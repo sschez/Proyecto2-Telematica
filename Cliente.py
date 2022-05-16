@@ -5,7 +5,6 @@ import constants
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-
 def main():
     print('***********************************')
     print('Client is running...')
@@ -36,4 +35,8 @@ def main():
     #print(str(response).encode("utf-8").decode())    #UTF-8-enconding string
     print(response)
 
+    #close connection with host
     client_socket.close()
+
+if __name__ == '__main__':
+    main()
