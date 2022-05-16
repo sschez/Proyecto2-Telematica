@@ -9,6 +9,7 @@
 import socket
 import threading
 import constants
+import os
 
 # Defining a socket object...
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -41,6 +42,8 @@ def handler_client_connection(client_connection,client_address):
             response = '200 BYE\n'
             client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
             is_connected = False
+        #elif (command == constants.GET):
+           
         elif (command == constants.DATA):
             response = "300 DRCV\n"
             client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
