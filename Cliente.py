@@ -1,27 +1,39 @@
 import chunk
 import re
 import socket
+import constants
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#Connect to host
-sock.connect(("www.google.com", 80))
 
-#Send request
-request = b"GET /images/branding/googlelogo/1x/googlelogo_color_150x54dp.png HTTP/1.1\nHost:www.google.com\r\nConnection: close\r\n\r\n"
-sock.sendall(request)
+def main():
+    print('***********************************')
+    print('Client is running...')
+    host_to_connect = input()
 
-#Receive response
-response = b""
-while True:
-    chunk = sock.recv(4096)
-    if len(chunk) == 0:
-        break
-    response = response + chunk
+    #Connect to host
+    client_socket.connect((host_to_connect, constants.PORT_HTTP))
+    local_tuple = client_socket.getsockname()
+    print('Connected to the server from:', local_tuple)
+    print('Enter \"quit\" to exit')
+    print('Input commands:')
+    command_to_send = input()
 
-#Print response
+    #Send request
+    request = b"GET /images/branding/googlelogo/1x/googlelogo_color_150x54dp.png HTTP/1.1\nHost:www.google.com\r\nConnection: close\r\n\r\n"
+    client_socket.sendall(request)
 
-#print(str(response).encode("utf-8").decode())    #UTF-8-enconding string
-print(response)
+    #Receive response
+    response = b""
+    while True:
+        chunk = client_socket.recv(4096)
+        if len(chunk) == 0:
+            break
+        response = response + chunk
 
-sock.close()
+    #Print response
+
+    #print(str(response).encode("utf-8").decode())    #UTF-8-enconding string
+    print(response)
+
+    client_socket.close()
