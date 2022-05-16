@@ -42,8 +42,31 @@ def handler_client_connection(client_connection,client_address):
             response = '200 BYE\n'
             client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
             is_connected = False
-        #elif (command == constants.GET):
-           
+        elif (command == constants.GET):
+            data_to_send = input('Input data to get:')
+            request = command + ' ' + data_to_send + ' ' + 'HTTP/1.1\r\nHost: '+ server_socket + '\r\n\r\n'
+            client_connection.send(request.encode())
+            #Recieve GET and save File
+            response = client_connection.recv(4000000).split(b"\r\n\r\n")
+            print(response[0].decode())
+            #200 or 404
+            status_code = response[0].decode().split(' ')[1]
+            if(status_code=='200'):
+                #time.sleep(2)
+                file_recieve = response[1]
+                #print(file_recieve.decode())
+                if(data_to_send.lstrip('/' == (''))):
+                    data_to_send = 'html/index.html'
+                file = open("./Cliente/"+data_to_send,'wb')
+                file.write(file_recieve)
+                file.close()
+            if(data_to_send.endswith('.jpg')): 
+                mimetype = 'image/jpg'
+            elif(data_to_send.endswith('.pdf')):
+                mimetype = 'application/pdf'
+            else:
+                mimetype = 'text.html'
+            header+='Content-Type'+str(mimetype)+'\n\n'
         elif (command == constants.DATA):
             response = "300 DRCV\n"
             client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
