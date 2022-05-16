@@ -18,6 +18,36 @@ def main():
     print('Input commands:')
     command_to_send = input()
 
+
+
+
+    while command_to_send != constants.QUIT:
+        print('1. GET')
+        print('2. HEAD')
+        print('3. POST')
+
+        if command_to_send == '1': #GET
+            print('Please input a valid command...')
+            command_to_send = input()                       
+        elif (command_to_send == '2'): #HEAD
+            data_to_send = input('Input data to send: ') 
+            command_and_data_to_send = command_to_send + ' ' + data_to_send
+            client_socket.send(bytes(command_and_data_to_send,constants.ENCONDING_FORMAT))
+            data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)        
+            print(data_received.decode(constants.ENCONDING_FORMAT))
+            command_to_send = input()               
+        elif (command_to_send == '3'): #POST    
+            client_socket.send(bytes(command_to_send,constants.ENCONDING_FORMAT))
+            data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)        
+            print(data_received.decode(constants.ENCONDING_FORMAT))
+            command_to_send = input()
+        else:
+            print('Please input a valid command...')
+            command_to_send = input()
+
+
+
+
     #Send request
     request = b"GET /images/branding/googlelogo/1x/googlelogo_color_150x54dp.png HTTP/1.1\nHost:www.google.com\r\nConnection: close\r\n\r\n"
     client_socket.sendall(request)
