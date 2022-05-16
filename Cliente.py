@@ -1,27 +1,21 @@
-# ********************************************************************************************
-    # Lab: Introduction to sockets
-    # Course: ST0255 - Telemática
-    # TCP-Socket Client
-# ********************************************************************************************
-
-#Import libraries for networking communication...
-
-
+import chunk
+import re
 import socket
 import constants
 
-client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def main():
-    print('***********************************')
-    print('Client is running...')
-    client_socket.connect(("127.0.0.1",constants.PORT))
-    local_tuple = client_socket.getsockname()
-    print('Connected to the server from:', local_tuple)
-    print('Enter \"quit\" to exit')
-    print('Input commands:')
-    command_to_send = input()
+#Receive response
+response = b""
+while True:
+    chunk = sock.recv(4096)
+    if len(chunk) == 0:
+        break
+    response = response + chunk
 
+#Print response
+
+#HEAD
     while command_to_send != constants.QUIT:
         if command_to_send == '':
             print('Please input a valid command...')
@@ -45,5 +39,8 @@ def main():
     print('Closing connection...BYE BYE...')
     client_socket.close()    
 
-if __name__ == '__main__':
-    main()
+#print(str(response).encode("utf-8").decode())    #UTF-8-enconding string
+print(response)
+#>>>>>>> 9237e3e3fb13fd5f5f410f892bbb283e349934e6
+
+sock.close()
