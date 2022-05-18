@@ -37,18 +37,16 @@ def main():
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
-            response = receiveResponse(client_socket)
-            print('***********************************')
-            print(response[0])
-            print('***********************************')
-            print(response[1])
-            #Status code 
+            response = old_receiveResponse(client_socket)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
             #print(headers)
-            #print(headers[b'Content-Type'])
+            print("Content type: ", headers[b'Content-Type'])
             if (status_code == '200'):
                 received_file = response[1]
+                print("Content type (0): ", headers[b'Content-Type'].split(b';')[0])
+                if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
+                    print("Get resources")
         elif (command_to_send == constants.POST):
             print('POST')
         elif (command_to_send == constants.DELETE):   
@@ -60,7 +58,6 @@ def main():
         else:
             print('Please input a valid command...')
             command_to_send = input()
-        print(command_to_send)
         print('***********************************')
         print('Enter a new command:')
         command_to_send = input()
@@ -69,27 +66,37 @@ def main():
     print('Closing connection...')
     client_socket.close()  
 
-#Receive response
+#Receive simple response with wide buffer
 def receiveResponse(client_socket):
-    content_length = 0
+    response = b""
+    response = client_socket.recv(1000000000)
+    response = response.split(b"\r\n\r\n")
+    return response
+
+#Receive response
+def old_receiveResponse(client_socket):
+    count = 0
+    content_length = 10000
     response = b""
     while True:
         chunk = client_socket.recv(4096)
         if len(chunk) == 0:
             break
         response = response + chunk
-        for item in response.split(b"\r\n"):
-            if (item.split(b":")[0] == "Content-Length"):
-                content_length = int(item.split(b":")[1].lstrip())
-                print(item.split(b":")[0], item.split(b":")[1])
-        if content_length <= len(response):
-            print("BREAK")
+        if count == 0:
+            for item in response.split(b"\r\n"):
+                if (item.split(b":")[0] == "Content-Length"):
+                    content_length = int(item.split(b":")[1].lstrip())
+        #else: 
+            #print("CHUNK: ", chunk.split(b"\r\n")[0])
+        if count == 1 and (chunk.split(b"\r\n")[0] == b"0" or content_length <= len(response)):
             break
-    #print(response)
+        count = 1
+        #print("CHUNK: ", chunk)
     response = response.split(b"\r\n\r\n")
     return response    
 
-
+#Function to get a dictionary with keys/value headers
 def getHeaders(response):
     response = response.split(b"\r\n")
     headers = {}
@@ -103,10 +110,6 @@ def getHeaders(response):
 #Function to get response's status code
 def getStatusCode(response):
     return response[0].decode().split(' ')[1]
-
-#Print response
-#print(str(response).encode("utf-8").decode())    #UTF-8-enconding string
-#print(response)
 
 if __name__ == '__main__':
     main()
