@@ -32,14 +32,19 @@ def handler_client_connection(client_connection,client_address):
     is_connected = True
     
     while is_connected:
-        print("prueba")
         data_recevived = client_connection.recv(1024).decode(constants.ENCONDING_FORMAT)
-        print(data_recevived)
+        print(data_recevived)        
         remote_string = str(data_recevived)
         #remote_string = str(data_recevived.decode(constants.ENCONDING_FORMAT))
         remote_command = remote_string.split()
+        print(remote_string)
         command = remote_command[0]
-        requesting_source= remote_command[1]
+        if (command == constants.QUIT):
+            response = '200 BYE\n'
+            client_connection.sendall(response.encode())
+            is_connected = False
+        else:
+            requesting_source= remote_command[1]
 
         print('Client request', requesting_source)
 
@@ -52,12 +57,13 @@ def handler_client_connection(client_connection,client_address):
         if (command == constants.GET):
             if(myfile == '' or myfile=='/'):
                 myfile='index.html'
+                
             try:
                 file = open(myfile,'rb')
                 response = file.read()
                 file.close()
                 
-                header = 'HTTP/1.1 200 OK\n'
+                header = 'HTTP/1.1 200 OK\r\n'
                     
                 if(requesting_source.endswith('.jpg')):
                         mimetype = 'image/jpg'
@@ -67,22 +73,23 @@ def handler_client_connection(client_connection,client_address):
                         mimetype = 'application/pdf'
                 else:
                         mimetype = 'text/html'
-                header += 'Contentt Type: '+str(mimetype)+'\r\n'
-                header += 'Content-Length: '+len(response)+'\r\n\r\n'
+                header += 'Content-Type: '+str(mimetype)+'\r\n\r\n'
+                #header += 'Content-Length: '+len(str(response))+'\r\n\r\n'
 
             except Exception as e:
-                header = 'HTTP/1.1 404 Not Found\n\n'
-                response= '<html><body>Error 404: File not Found</body></html>'.encode(constants.ENCONDING_FORMAT)
-            final_response = header.encode(constants.ENCONDING_FORMAT)
+                header = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                response= '<html><body>Error 404: File not Found</body></html>'.encode()
+            final_response = header.encode()
             final_response += response            
             client_connection.sendall(final_response)
             print(final_response)
-            #client_connection.close()
+        
 
         elif (command == constants.DELETE):
-            os.remove(source)
-            response = '200 DELETED\n'
-            client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
+            os.remove(requesting_source)
+            response = '100 DELETED\n'
+            client_connection.sendall(response.encode())
+
         elif (command == constants.HEAD):
             data = client_connection.recv(200)
             client_connection.send(b'HTTP/1.0 200 OK\r\n')
