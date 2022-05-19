@@ -47,6 +47,7 @@ def main():
                     print(response[1])
                     resources = re.findall("\s(=:src|href)(?:=\")([a-zA-Z0-9._/-]+?)\"", str(response[1]))
                     print("Resources: ", resources)
+                    
             elif (status_code == '404'):
                 print('Resource not found.')
         elif (command_to_send == constants.POST or command_to_send == constants.PUT):
@@ -154,7 +155,7 @@ def getResources(file):
 def getHeaders(response):
     response = response.split(b"\r\n")
     headers = {}
-    for header in response[1:len(response)-1]:
+    for header in response[1:len(response)]:
         tmp = header.split(b":")
         key = tmp[0]
         value = tmp[1].lstrip()
