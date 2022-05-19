@@ -70,6 +70,19 @@ def main():
             request += 'Content-Length: ' + str(file_len) + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
             request += str(file_data) + '\r\n'
+            #print('REQUEST: ', request)
+            #print('***********************************')
+            #Send request
+            client_socket.sendall(request.encode())
+            #Receive response
+            response = receiveResponse(client_socket)
+            status_code = getStatusCode(response)
+            print("Response: ", response)
+        elif (command_to_send == constants.DELETE):
+            print('Enter the relative path for the file to delete:')
+            file_path = input()   
+            request = command_to_send +' ' + file_path + ' HTTP/1.1\r\n'
+            request += 'Host: ' + host_to_connect + '\r\n'
             print('REQUEST: ', request)
             print('***********************************')
             #Send request
@@ -78,12 +91,11 @@ def main():
             response = receiveResponse(client_socket)
             status_code = getStatusCode(response)
             print("Response: ", response)
-        elif (command_to_send == constants.DELETE):   
-            print('DELETE')
         elif (command_to_send == constants.HEAD):
             print('Input data to get')
             data_to_get = input()
-            request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\nHost: ' + host_to_connect + '\r\n\r\n'
+            request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\n'
+            request += 'Host: ' + host_to_connect + '\r\n\r\n'
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
@@ -107,7 +119,9 @@ def main():
 #Receive simple response with wide buffer
 def receiveResponse(client_socket):
     response = b""
+    print("BEFORE RECEIVING")
     response = client_socket.recv(1000000000)
+    print(response)
     response = response.split(b"\r\n\r\n")
     return response
 
