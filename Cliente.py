@@ -81,9 +81,10 @@ def main():
         elif (command_to_send == constants.DELETE):
             print('Enter the relative path for the file to delete:')
             file_path = input()   
-            request = command_to_send +' ' + file_path + ' HTTP/1.1\r\n'
+            request = command_to_send + ' ' + file_path + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
-            print('REQUEST: ', request)
+            request += 'Connection: keep-alive\r\n\r\n'
+            print('REQUEST:', request)
             print('***********************************')
             #Send request
             client_socket.sendall(request.encode())
@@ -119,7 +120,6 @@ def main():
 #Receive simple response with wide buffer
 def receiveResponse(client_socket):
     response = b""
-    print("BEFORE RECEIVING")
     response = client_socket.recv(1000000000)
     print(response)
     response = response.split(b"\r\n\r\n")
