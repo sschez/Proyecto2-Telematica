@@ -44,9 +44,8 @@ def main():
             if (status_code == '200'):
                 received_file = response[1]
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    print(response[1])
                     resources = re.findall("\s(=:src|href)(?:=\")([a-zA-Z0-9._/-]+?)\"", str(response[1]))
-                    print("Resources: ", resources)
+                    getResources(resources, host_to_connect)
                     
             elif (status_code == '404'):
                 print('Resource not found.')
@@ -117,6 +116,9 @@ def main():
         command_to_send = input()
 
     #Quit program - Close connection
+    client_socket.sendall(b'QUIT')
+    response = receiveResponse(client_socket)
+    print(response)
     print('Closing connection...')
     client_socket.close()  
 
@@ -148,8 +150,19 @@ def old_receiveResponse(client_socket):
     response = response.split(b"\r\n\r\n")
     return response  
 
-def getResources(file): 
-    print("Get resources") 
+def getResources(resources, host): 
+    for item in resources:
+        request = 'GET' + ' ' + item + ' ' + 'HTTP/1.1\r\n'
+        request += 'Host: ' + host + '\r\n'
+        request += 'Connection: keep-alive\r\n\r\n'
+        #Send request
+        client_socket.sendall(request.encode())
+        #Receive response
+        response = receiveResponse(client_socket)
+        status_code = getStatusCode(response)
+        if (status_code == '200'):
+                received_file = response[1]
+                os.makedirs()
 
 #Function to get a dictionary with keys/value headers
 def getHeaders(response):
