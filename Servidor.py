@@ -6,8 +6,11 @@
 
 # Import libraries for networking communication and concurrency...
 
+from inspect import modulesbyfile
 import socket
 import threading
+
+from numpy import source
 import constants
 import os
 
@@ -27,48 +30,66 @@ def main():
 def handler_client_connection(client_connection,client_address):
     print(f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
     is_connected = True
+    
     while is_connected:
-        data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE)
-        remote_string = str(data_recevived.decode(constants.ENCONDING_FORMAT))
+        print("prueba")
+        data_recevived = client_connection.recv(1024).decode(constants.ENCONDING_FORMAT)
+        print(data_recevived)
+        remote_string = str(data_recevived)
+        #remote_string = str(data_recevived.decode(constants.ENCONDING_FORMAT))
         remote_command = remote_string.split()
         command = remote_command[0]
+        requesting_source= remote_command[1]
+
+        print('Client request', requesting_source)
+
+        myfile = requesting_source.split('?')[0]
+        myfile = myfile.lstrip('/')
+
         print (f'Data received from: {client_address[0]}:{client_address[1]}')
         print(command)
         
-        if (command == constants.HELO):
-            response = '100 OK\n'
-            client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
-        elif (command == constants.QUIT):
-            response = '200 BYE\n'
-            client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
-            is_connected = False
-        elif (command == constants.GET):
-            data_to_send = input('Input data to get:')
-            request = command + ' ' + data_to_send + ' ' + 'HTTP/1.1\r\nHost: '+ server_socket + '\r\n\r\n'
-            client_connection.send(request.encode())
-            #Recieve GET and save File
-            response = client_connection.recv(4000000).split(b"\r\n\r\n")
-            print(response[0].decode())
-            #200 or 404
-            status_code = response[0].decode().split(' ')[1]
-            if(status_code=='200'):
-                #time.sleep(2)
-                file_recieve = response[1]
-                #print(file_recieve.decode())
-                if(data_to_send.lstrip('/' == (''))):
-                    data_to_send = 'html/index.html'
-                file = open("./Cliente/"+data_to_send,'wb')
-                file.write(file_recieve)
+        if (command == constants.GET):
+            if(myfile == '' or myfile=='/'):
+                myfile='index.html'
+            try:
+                file = open(myfile,'rb')
+                response = file.read()
                 file.close()
-            if(data_to_send.endswith('.jpg')): 
-                mimetype = 'image/jpg'
-            elif(data_to_send.endswith('.pdf')):
-                mimetype = 'application/pdf'
-            else:
-                mimetype = 'text.html'
-            header+='Content-Type'+str(mimetype)+'\n\n'
-        elif (command == constants.DATA):
-            response = "300 DRCV\n"
+                
+                header = 'HTTP/1.1 200 OK\n'
+                    
+                if(requesting_source.endswith('.jpg')):
+                        mimetype = 'image/jpg'
+                elif(requesting_source.endswith('.css')):
+                        mimetype = 'text/css'
+                elif(requesting_source.endswith('.pdf')):
+                        mimetype = 'application/pdf'
+                else:
+                        mimetype = 'text/html'
+                header += 'Contentt Type: '+str(mimetype)+'\r\n'
+                header += 'Content-Length: '+len(response)+'\r\n\r\n'
+
+            except Exception as e:
+                header = 'HTTP/1.1 404 Not Found\n\n'
+                response= '<html><body>Error 404: File not Found</body></html>'.encode(constants.ENCONDING_FORMAT)
+            final_response = header.encode(constants.ENCONDING_FORMAT)
+            final_response += response            
+            client_connection.sendall(final_response)
+            print(final_response)
+            #client_connection.close()
+
+        elif (command == constants.DELETE):
+            os.remove(source)
+            response = '200 DELETED\n'
+            client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
+        elif (command == constants.HEAD):
+            data = client_connection.recv(200)
+            client_connection.send(b'HTTP/1.0 200 OK\r\n')
+            client_connection.send(b"Content-Type: text/html\r\n\r\n")
+            client_connection.send(b'<html><body><h1>Hello World</body></html>')
+            client_connection.send(b"Resp: " + data)
+            client_connection.close()
             client_connection.sendall(response.encode(constants.ENCONDING_FORMAT))
         else:
             response = '400 BCMD\n\rCommand-Description: Bad command\n\r'
