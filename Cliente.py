@@ -2,6 +2,7 @@ import chunk
 import re
 import socket
 import constants
+import os
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -30,31 +31,68 @@ def main():
         #GET
         if command_to_send == constants.GET:
             print('Input data to get')
-            #Get data to get from user
             data_to_get = input()
-            #Create request to send
-            request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\nHost: ' + host_to_connect + '\r\n\r\n'
+            request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\n'
+            request += 'Host: ' + host_to_connect + '\r\n\r\n'
+            request += 'Connection: keep-alive\r\n\r\n'
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = old_receiveResponse(client_socket)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
-            #print(headers)
-            print("Content type: ", headers[b'Content-Type'])
             if (status_code == '200'):
                 received_file = response[1]
-                print("Content type (0): ", headers[b'Content-Type'].split(b';')[0])
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    print("Get resources")
-        elif (command_to_send == constants.POST):
-            print('POST')
+                    resources = getResources(received_file)
+            elif (status_code == '404'):
+                print('Resource not found.')
+        elif (command_to_send == constants.POST or command_to_send == constants.PUT):
+            content_type = 'multipart/form-data'
+            print('Enter the relative path for the file to send:')
+            file_path = input()
+            file_name = os.path.basename(file_path)
+            success = False
+            try:
+                print('Uploading file...')
+                file = open(file_path, 'rb')
+                file_data = file.read()
+                print('Read! Data: ', file_data)
+                file_len = len(file_data)
+                print('Length: ', file_len)
+                file.close()
+                success = True
+            except Exception:
+                print(Exception)
+            request = command_to_send +' ' + '/uploads/' + file_path + ' HTTP/1.1\r\n'
+            request += 'Host: ' + host_to_connect + '\r\n'
+            request += 'Content-Type: ' + content_type + '\r\n'
+            request += 'Content-Length: ' + str(file_len) + '\r\n'
+            request += 'Connection: keep-alive\r\n\r\n'
+            request += str(file_data) + '\r\n'
+            print('REQUEST: ', request)
+            print('***********************************')
+            #Send request
+            client_socket.sendall(request.encode())
+            #Receive response
+            response = receiveResponse(client_socket)
+            status_code = getStatusCode(response)
+            print("Response: ", response)
         elif (command_to_send == constants.DELETE):   
             print('DELETE')
         elif (command_to_send == constants.HEAD):
-            print('HEAD')
-        elif (command_to_send == constants.PUT):
-            print('PUT')
+            print('Input data to get')
+            data_to_get = input()
+            request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\nHost: ' + host_to_connect + '\r\n\r\n'
+            #Send request
+            client_socket.sendall(request.encode())
+            #Receive response
+            response = b''
+            response = client_socket.recv(8000)
+            response = response.split(b"\r\n\r\n")
+            print('Response: ', response)
+            status_code = getStatusCode(response)
+            headers = getHeaders(response[0])
         else:
             print('Please input a valid command...')
             command_to_send = input()
@@ -87,14 +125,14 @@ def old_receiveResponse(client_socket):
             for item in response.split(b"\r\n"):
                 if (item.split(b":")[0] == "Content-Length"):
                     content_length = int(item.split(b":")[1].lstrip())
-        #else: 
-            #print("CHUNK: ", chunk.split(b"\r\n")[0])
         if count == 1 and (chunk.split(b"\r\n")[0] == b"0" or content_length <= len(response)):
             break
         count = 1
-        #print("CHUNK: ", chunk)
     response = response.split(b"\r\n\r\n")
-    return response    
+    return response  
+
+def getResources(file): 
+    print("Get resources") 
 
 #Function to get a dictionary with keys/value headers
 def getHeaders(response):
