@@ -33,18 +33,20 @@ def main():
             print('Input data to get')
             data_to_get = input()
             request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\n'
-            request += 'Host: ' + host_to_connect + '\r\n\r\n'
+            request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
-            response = old_receiveResponse(client_socket)
+            response = receiveResponse(client_socket)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
             if (status_code == '200'):
                 received_file = response[1]
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    resources = getResources(received_file)
+                    print(response[1])
+                    resources = re.findall("\s(=:src|href)(?:=\")([a-zA-Z0-9._/-]+?)\"", str(response[1]))
+                    print("Resources: ", resources)
             elif (status_code == '404'):
                 print('Resource not found.')
         elif (command_to_send == constants.POST or command_to_send == constants.PUT):
