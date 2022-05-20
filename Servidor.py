@@ -29,22 +29,31 @@ def main():
 def handler_client_connection(client_connection,client_address):
     print(f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
     is_connected=True
-    while is_connected:                
-        data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE).decode()
-        #print('data',data_recevived)
+    while is_connected:
+        data = client_connection.recv(constants.RECV_BUFFER_SIZE).split(b'\r\n\r\n')
+        data_recevived= data[0].decode()
+        #print('data:',data[1])
+        print('data_r:',data_recevived)
+        #print(data_recevived)
+        #print('data',data_recevived)        
         remote_string = str(data_recevived)
+        #print('rs:',remote_string)
         remote_command = remote_string.split()
         #print('remote:',remote_command)
-        command = remote_command[0]        
-        #print('command',command)
-        if (command == constants.QUIT):
+        command = remote_command[0]
+        
+
+        if (remote_string == constants.QUIT):
             response = '200 BYE\n'
             client_connection.sendall(response.encode())
             print(f'Now, client {client_address[0]}:{client_address[1]} is disconnected...')
-            client_connection.close()
             is_connected=False
+            client_connection.close()
             break
         else:
+            savefile = remote_command[1].split('/')
+            format = savefile[len(savefile)-1]
+            print('savefile',savefile)
             requesting_source= remote_command[1]
 
             print('Client request', requesting_source)
@@ -103,26 +112,61 @@ def handler_client_connection(client_connection,client_address):
             elif(command==constants.POST):  
                 #print("Entra")  
                 #print(remote_string)
-                savefile = requesting_source
+                #savefile = requesting_source
                 #savefile = requesting_source.split('/')
                 #format = savefile[1:len(savefile)]
                 #print(format)
                 #fd = os.open(str(format),os.O_RDWR|os.O_CREAT)
                 #print('fd:',fd)
-                file = data_recevived.split('\r\n\r\n')[1]
-                print('file: ',file)
-                #completeFile=os.path.join(str(savefile),str(file))
-                try:
-                    newfile = open(savefile,"wb")
-                    newfile.write(file.encode())
-                    newfile.close()
-                    
-                    header = 'HTTP/1.1 200 OK\r\n\r\n'
-                except Exception as e:
-                    header = 'HTTP/1.1 404 Not Found\r\n\r\n'
-                    response= '<html><body>Error 404: File not Found</body></html>'.encode()
-                print(header)
-                client_connection.sendall(header.encode())
+                #print(format)
+                if(format.endswith('.jpg') or format.endswith('.jpeg')):
+                    #print("Entro")
+                    file = data[1]
+                    print('file: ',file)
+                    #completeFile=os.path.join(str(savefile),str(file))
+                    try:
+                        newfile = open(remote_command[1],"wb")
+                        newfile.write(file)
+                        newfile.close()
+                        
+                        header = 'HTTP/1.1 200 OK\r\n\r\n'
+                    except Exception as e:
+                        header = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                        response= '<html><body>Error 404: File not Found</body></html>'.encode()
+                    print(header)
+                    client_connection.sendall(header.encode())
+                elif(format.endswith('.pdf')):
+                                        #print("Entro")
+                    file = data[1]
+                    print('file: ',file)
+                    #completeFile=os.path.join(str(savefile),str(file))
+                    try:
+                        newfile = open(remote_command[1],"wb")
+                        newfile.write(file)
+                        newfile.close()
+                        
+                        header = 'HTTP/1.1 200 OK\r\n\r\n'
+                    except Exception as e:
+                        header = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                        response= '<html><body>Error 404: File not Found</body></html>'.encode()
+                    print(header)
+                    client_connection.sendall(header.encode())
+                else:                    
+                    file = data[1]
+                    print('file: ',file)
+                    print('remote_string ',remote_command[1])
+                    #completeFile=os.path.join(str(savefile),str(file))
+                    try:
+                        newfile = open(remote_command[1],"wb")
+                        newfile.write(file)
+                        newfile.close()
+                        
+                        header = 'HTTP/1.1 200 OK\r\n\r\n'
+                    except Exception as e:
+                        header = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                        response= '<html><body>Error 404: File not Found</body></html>'.encode()
+                    print(header)
+                    client_connection.sendall(header.encode())
                 
             elif (command == constants.HEAD):
                 if(myfile == '' or myfile=='/'):
