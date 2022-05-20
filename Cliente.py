@@ -72,6 +72,7 @@ def main():
                 success = True
             except Exception:
                 print(Exception)
+                success = False
 
             if (file_name.endswith('.jpg') or file_name.endswith('.jpeg')):
                 mimetype = 'image/jpg'
@@ -82,22 +83,24 @@ def main():
             else:
                 mimetype = 'text/html'
             content_type = mimetype
-
-            request = command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
-            request += 'Host: ' + host_to_connect + '\r\n'
-            request += 'Content-Type: ' + content_type + '\r\n'
-            request += 'Content-Length: ' + str(file_len) + '\r\n'
-            request += 'Connection: keep-alive\r\n\r\n'
-            request += file_data.decode()
-            request += '\r\n'
-            printRequest(request)
-            #Send request
-            client_socket.sendall(request.encode())
-            #Receive response
-            response = receiveResponse(client_socket)
-            printResponse(response)
-            status_code = getStatusCode(response)
-            #print("Response: ", response)
+            if success == True:
+                request = command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
+                request += 'Host: ' + host_to_connect + '\r\n'
+                request += 'Content-Type: ' + content_type + '\r\n'
+                request += 'Content-Length: ' + str(file_len) + '\r\n'
+                request += 'Connection: keep-alive\r\n\r\n'
+                request += file_data.decode()
+                request += '\r\n'
+                printRequest(request)
+                #Send request
+                client_socket.sendall(request.encode())
+                #Receive response
+                response = receiveResponse(client_socket)
+                printResponse(response)
+                status_code = getStatusCode(response)
+                #print("Response: ", response)
+            else:
+                "File not found."
             print('***********************************')
             print('Enter a new command:')
             command_to_send = input()
