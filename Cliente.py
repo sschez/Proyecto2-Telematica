@@ -15,7 +15,7 @@ def main():
     host_to_connect = input()
 
     #Connect to host
-    client_socket.connect((host_to_connect, constants.PORT))
+    client_socket.connect((host_to_connect, constants.PORT_HTTP))
     local_tuple = client_socket.getsockname()
     print('Connected to the server from:', local_tuple)
     print('Enter \"quit\" to exit')
@@ -42,17 +42,14 @@ def main():
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
-            #print(response[1])
-            #printResponse(response)
+            printResponse(response)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
             if (status_code == '200'):
                 received_file = response[1]
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    #print(response[1].decode())
-                    resources = findResources(response[1].decode())
-                    #print(response[1].decode())
-                    print('Resource:', resources) 
+                    saveIndex(received_file)
+                    resources = findResources(received_file.decode())
                     getResources(resources, host_to_connect)
                     print("Resources saved locally!")     
             elif (status_code == '404'):
@@ -71,9 +68,7 @@ def main():
                 print('Uploading file...')
                 file = open(file_path, 'rb')
                 file_data = file.read()
-                #print('Read! Data: ', file_data)
                 file_len = len(file_data)
-                #print('Length: ', file_len)
                 file.close()
                 success = True
             except Exception:
@@ -211,6 +206,7 @@ def getResources(resources, host):
                 newfile.close()
             except:
                 print('File', filename, 'could not be stored')
+        
 
 #Function to get a dictionary with keys/value headers
 def getHeaders(response):
@@ -240,12 +236,15 @@ def printResponse(response):
 
 def findResources(response):
     resources = []
-    print("Resp in resources:", response)
     soup = BeautifulSoup(response, 'html.parser')
     for img in soup.find_all('img'):
         resources.append(img.get('src'))
-    print("Resources in method:", resources)
     return resources
+
+def saveIndex(data):
+    newfile = open('downloads/index.html',"wb")
+    newfile.write(data)
+    newfile.close()
 
 if __name__ == '__main__':
     main()
