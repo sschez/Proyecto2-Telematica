@@ -76,16 +76,15 @@ def main():
             else:
                 mimetype = 'text/html'
             content_type = mimetype
-            
-            request = b''
-            request += command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
+
+            request = command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Content-Type: ' + content_type + '\r\n'
             request += 'Content-Length: ' + str(file_len) + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
             request += str(file_data) + '\r\n'
-            print('REQUEST: ', request)
-            #print('***********************************')
+            print('***********************************')
+            print('REQUEST: \n', request)
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
@@ -94,11 +93,12 @@ def main():
             #print("Response: ", response)
         elif (command_to_send == constants.DELETE):
             print('Enter the relative path for the file to delete:')
-            file_path = input()   
+            file_path = input()
+
             request = command_to_send + ' ' + file_path + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
-            print('REQUEST:', request)
+            print('REQUEST:', request.decode())
             print('***********************************')
             #Send request
             client_socket.sendall(request.encode())
