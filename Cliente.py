@@ -53,6 +53,8 @@ def main():
             content_type = 'multipart/form-data'
             print('Enter the relative path for the file to send:')
             file_path = input()
+            print('Enter the path to save the file:')
+            path_save = input()
             file_name = os.path.basename(file_path)
             success = False
             try:
@@ -66,20 +68,20 @@ def main():
                 success = True
             except Exception:
                 print(Exception)
-            request = command_to_send +' ' + '/uploads/' + file_path + ' HTTP/1.1\r\n'
+            request = command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Content-Type: ' + content_type + '\r\n'
             request += 'Content-Length: ' + str(file_len) + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
             request += str(file_data) + '\r\n'
-            #print('REQUEST: ', request)
+            print('REQUEST: ', request)
             #print('***********************************')
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
             status_code = getStatusCode(response)
-            print("Response: ", response)
+            #print("Response: ", response)
         elif (command_to_send == constants.DELETE):
             print('Enter the relative path for the file to delete:')
             file_path = input()   
