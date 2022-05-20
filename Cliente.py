@@ -205,7 +205,7 @@ def printResponse(response):
     print('***********************************')
     print('RESPONSE:')
     for res in response:
-        print(response.decode())
+        print(res.decode())
 
 if __name__ == '__main__':
     main()
