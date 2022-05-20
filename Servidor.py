@@ -87,6 +87,8 @@ def handler_client_connection(client_connection,client_address):
                             mimetype = 'text/csv'
                     elif(requesting_source.endswith('.mpeg')):
                             mimetype = 'video/mpeg'
+                    elif(requesting_source.endswith('.exe')):
+                            mimetype = 'application/exe'
                     else:
                             mimetype = 'text/html'
                     header += 'Content-Type: '+str(mimetype)+'\r\n\r\n'
