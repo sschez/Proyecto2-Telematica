@@ -3,6 +3,7 @@ import re
 import socket
 import constants
 import os
+from bs4 import BeautifulSoup
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -41,14 +42,19 @@ def main():
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
-            printResponse(response)
+            #print(response[1])
+            #printResponse(response)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
             if (status_code == '200'):
                 received_file = response[1]
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    resources = re.findall("\s(=:src|href)(?:=\")([a-zA-Z0-9._/-]+?)\"", str(response[1]))
-                    getResources(resources, host_to_connect)      
+                    #print(response[1].decode())
+                    resources = findResources(response[1].decode())
+                    #print(response[1].decode())
+                    print('Resource:', resources) 
+                    getResources(resources, host_to_connect)
+                    print("Resources saved locally!")     
             elif (status_code == '404'):
                 print('Resource not found.')
             print('***********************************')
@@ -180,7 +186,7 @@ def old_receiveResponse(client_socket):
     response = response.split(b"\r\n\r\n")
     return response  
 
-def getResources(resources, host): 
+def getResources(resources, host):
     for item in resources:
         request = 'GET' + ' ' + item + ' ' + 'HTTP/1.1\r\n'
         request += 'Host: ' + host + '\r\n'
@@ -191,8 +197,20 @@ def getResources(resources, host):
         response = receiveResponse(client_socket)
         status_code = getStatusCode(response)
         if (status_code == '200'):
-                received_file = response[1]
-                os.makedirs()
+            received_file = response[1]
+            print('File recovered...')
+            try:
+                path = 'downloads/'
+                item = item.split('/')
+                for name in item:
+                    filename = name
+                path += filename
+                print("Path to save file:", filename)
+                newfile = open(path,"wb")
+                newfile.write(received_file)
+                newfile.close()
+            except:
+                print('File', filename, 'could not be stored')
 
 #Function to get a dictionary with keys/value headers
 def getHeaders(response):
@@ -219,6 +237,15 @@ def printResponse(response):
     print('RESPONSE:')
     for res in response:
         print(res.decode())
+
+def findResources(response):
+    resources = []
+    print("Resp in resources:", response)
+    soup = BeautifulSoup(response, 'html.parser')
+    for img in soup.find_all('img'):
+        resources.append(img.get('src'))
+    print("Resources in method:", resources)
+    return resources
 
 if __name__ == '__main__':
     main()
