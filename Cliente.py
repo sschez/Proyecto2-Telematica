@@ -45,12 +45,10 @@ def main():
                 received_file = response[1]
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
                     resources = re.findall("\s(=:src|href)(?:=\")([a-zA-Z0-9._/-]+?)\"", str(response[1]))
-                    getResources(resources, host_to_connect)
-                    
+                    getResources(resources, host_to_connect)      
             elif (status_code == '404'):
                 print('Resource not found.')
         elif (command_to_send == constants.POST or command_to_send == constants.PUT):
-            content_type = 'multipart/form-data'
             print('Enter the relative path for the file to send:')
             file_path = input()
             print('Enter the path to save the file:')
@@ -68,7 +66,19 @@ def main():
                 success = True
             except Exception:
                 print(Exception)
-            request = command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
+
+            if (file_name.endswith('.jpg') or file_name.endswith('.jpeg')):
+                mimetype = 'image/jpg'
+            elif(file_name.endswith('.css')):
+                mimetype = 'text/css'
+            elif(file_name.endswith('.pdf')):
+                mimetype = 'application/pdf'
+            else:
+                mimetype = 'text/html'
+            content_type = mimetype
+            
+            request = b''
+            request += command_to_send + ' ' + path_save + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Content-Type: ' + content_type + '\r\n'
             request += 'Content-Length: ' + str(file_len) + '\r\n'
