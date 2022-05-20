@@ -29,8 +29,7 @@ def main():
 def handler_client_connection(client_connection,client_address):
     print(f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
     is_connected=True
-    while is_connected:        
-        
+    while is_connected:                
         data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE).decode()
         #print('data',data_recevived)
         remote_string = str(data_recevived)
