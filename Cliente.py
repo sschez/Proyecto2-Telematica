@@ -15,7 +15,7 @@ def main():
     host_to_connect = input()
 
     #Connect to host
-    client_socket.connect((host_to_connect, constants.PORT))
+    client_socket.connect((host_to_connect, constants.PORT_HTTP))
     local_tuple = client_socket.getsockname()
     print('Connected to the server from:', local_tuple)
     print('Enter \"quit\" to exit')
@@ -231,8 +231,9 @@ def printRequest(request):
 def printResponse(response):
     print('***********************************')
     print('RESPONSE:')
-    for res in response:
-        print(res.decode())
+    print(response[0])
+    for res in response[1:len(response)]:
+        print(res)
 
 def findResources(response):
     resources = []
