@@ -33,7 +33,7 @@ def handler_client_connection(client_connection,client_address):
         data = client_connection.recv(constants.RECV_BUFFER_SIZE).split(b'\r\n\r\n')
         data_recevived= data[0].decode()
         #print('data:',data[1])
-        print('data_r:',data_recevived)
+        #print('data_r:',data_recevived)
         #print(data_recevived)
         #print('data',data_recevived)        
         remote_string = str(data_recevived)
@@ -122,7 +122,7 @@ def handler_client_connection(client_connection,client_address):
                 if(format.endswith('.jpg') or format.endswith('.jpeg')):
                     #print("Entro")
                     file = data[1]
-                    print('file: ',file)
+                    #print('file: ',file)
                     #completeFile=os.path.join(str(savefile),str(file))
                     try:
                         newfile = open(remote_command[1],"wb")
@@ -138,7 +138,7 @@ def handler_client_connection(client_connection,client_address):
                 elif(format.endswith('.pdf')):
                                         #print("Entro")
                     file = data[1]
-                    print('file: ',file)
+                    #print('file: ',file)
                     #completeFile=os.path.join(str(savefile),str(file))
                     try:
                         newfile = open(remote_command[1],"wb")
@@ -153,8 +153,8 @@ def handler_client_connection(client_connection,client_address):
                     client_connection.sendall(header.encode())
                 else:                    
                     file = data[1]
-                    print('file: ',file)
-                    print('remote_string ',remote_command[1])
+                    #print('file: ',file)
+                    #print('remote_string ',remote_command[1])
                     #completeFile=os.path.join(str(savefile),str(file))
                     try:
                         newfile = open(remote_command[1],"wb")
