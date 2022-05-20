@@ -89,11 +89,12 @@ def main():
                 request += 'Content-Type: ' + content_type + '\r\n'
                 request += 'Content-Length: ' + str(file_len) + '\r\n'
                 request += 'Connection: keep-alive\r\n\r\n'
-                request += file_data.decode(constants.ENCONDING_FORMAT)
-                request += '\r\n'
+                request = request.encode()
+                request += file_data
+                request += b'\r\n'
                 printRequest(request)
                 #Send request
-                client_socket.sendall(request.encode())
+                client_socket.sendall(request)
                 #Receive response
                 response = receiveResponse(client_socket)
                 printResponse(response)
