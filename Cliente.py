@@ -51,6 +51,9 @@ def main():
                     getResources(resources, host_to_connect)      
             elif (status_code == '404'):
                 print('Resource not found.')
+            print('***********************************')
+            print('Enter a new command:')
+            command_to_send = input()
         elif (command_to_send == constants.POST or command_to_send == constants.PUT):
             print('Enter the relative path for the file to send:')
             file_path = input()
@@ -62,7 +65,7 @@ def main():
                 print('Uploading file...')
                 file = open(file_path, 'rb')
                 file_data = file.read()
-                print('Read! Data: ', file_data)
+                #print('Read! Data: ', file_data)
                 file_len = len(file_data)
                 #print('Length: ', file_len)
                 file.close()
@@ -95,6 +98,9 @@ def main():
             printResponse(response)
             status_code = getStatusCode(response)
             #print("Response: ", response)
+            print('***********************************')
+            print('Enter a new command:')
+            command_to_send = input()
         elif (command_to_send == constants.DELETE):
             print('Enter the relative path for the file to delete:')
             file_path = input()
@@ -109,6 +115,9 @@ def main():
             response = receiveResponse(client_socket)
             status_code = getStatusCode(response)
             printResponse(response)
+            print('***********************************')
+            print('Enter a new command:')
+            command_to_send = input()
         elif (command_to_send == constants.HEAD):
             print('Input data to get')
             data_to_get = input()
@@ -124,12 +133,13 @@ def main():
             printResponse(response)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
+            print('***********************************')
+            print('Enter a new command:')
+            command_to_send = input()
         else:
             print('Please input a valid command...')
             command_to_send = input()
         print('***********************************')
-        print('Enter a new command:')
-        command_to_send = input()
 
     #Quit program - Close connection
     request = 'QUIT'
