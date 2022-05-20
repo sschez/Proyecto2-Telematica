@@ -188,7 +188,7 @@ def handler_client_connection(client_connection,client_address):
 
                 except Exception as e:
                     header = 'HTTP/1.1 404 Not Found\r\n\r\n'
-                    response= '<html><body>Error 404: File not Found</body></html>'.encode()
+                    #response= '<html><body>Error 404: File not Found</body></html>'.encode()
                 final_response = header.encode()                          
                 client_connection.sendall(final_response)
             
