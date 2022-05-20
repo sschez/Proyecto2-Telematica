@@ -29,7 +29,7 @@ def main():
 def handler_client_connection(client_connection,client_address):
     print(f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
     is_connected=True
-    while is_connected:
+    while is_connected:                
         data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE).decode()
         #print('data',data_recevived)
         remote_string = str(data_recevived)
@@ -72,6 +72,12 @@ def handler_client_connection(client_connection,client_address):
                             mimetype = 'text/css'
                     elif(requesting_source.endswith('.pdf')):
                             mimetype = 'application/pdf'
+                    elif(requesting_source.endswith('.doc')):
+                            mimetype = 'application/msword'
+                    elif(requesting_source.endswith('.csv')):
+                            mimetype = 'text/csv'
+                    elif(requesting_source.endswith('.mpeg')):
+                            mimetype = 'video/mpeg'
                     else:
                             mimetype = 'text/html'
                     header += 'Content-Type: '+str(mimetype)+'\r\n\r\n'
@@ -87,8 +93,11 @@ def handler_client_connection(client_connection,client_address):
             
 
             elif (command == constants.DELETE):
-                os.remove(requesting_source)
-                response = '100 DELETED\n'
+                try:
+                    os.remove(requesting_source)
+                    response = '100 DELETED\n'
+                except Exception as e:
+                    response = 'HTTP/1.1 404 Not Found\r\n\r\n'
                 client_connection.sendall(response.encode())
 
             elif(command==constants.POST):  
@@ -101,7 +110,7 @@ def handler_client_connection(client_connection,client_address):
                 #fd = os.open(str(format),os.O_RDWR|os.O_CREAT)
                 #print('fd:',fd)
                 file = data_recevived.split('\r\n\r\n')[1]
-                #print('file: ',file)
+                print('file: ',file)
                 #completeFile=os.path.join(str(savefile),str(file))
                 try:
                     newfile = open(savefile,"wb")
