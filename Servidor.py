@@ -31,12 +31,12 @@ def handler_client_connection(client_connection,client_address):
     is_connected=True
     while is_connected:
         data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE).decode()
-        print('data',data_recevived)
+        #print('data',data_recevived)
         remote_string = str(data_recevived)
         remote_command = remote_string.split()
-        print('remote:',remote_command)
+        #print('remote:',remote_command)
         command = remote_command[0]        
-        print('command',command)
+        #print('command',command)
         if (command == constants.QUIT):
             response = '200 BYE\n'
             client_connection.sendall(response.encode())
@@ -91,30 +91,29 @@ def handler_client_connection(client_connection,client_address):
                 response = '100 DELETED\n'
                 client_connection.sendall(response.encode())
 
-            elif(data_recevived==constants.POST or data_recevived==constants.PUT):  
-                print("Entra")             
+            elif(command==constants.POST):  
+                #print("Entra")  
+                #print(remote_string)
                 savefile = requesting_source
-                fd = os.open(savefile,os.O_RDWR)
-                print('savefile:',savefile)
-                print('fd:',fd)
-                file = data_recevived.split(b'\r\n\r\n')
-                print('file: ',file)
-                completeFile=os.path.join(savefile,file)
+                #savefile = requesting_source.split('/')
+                #format = savefile[1:len(savefile)]
+                #print(format)
+                #fd = os.open(str(format),os.O_RDWR|os.O_CREAT)
+                #print('fd:',fd)
+                file = data_recevived.split('\r\n\r\n')[1]
+                #print('file: ',file)
+                #completeFile=os.path.join(str(savefile),str(file))
                 try:
-                    with open(filename, "rb") as f:
-                        while True:
-                            bytes_read = f.read(constants.RECV_BUFFER_SIZE)
-                            if not bytes_read:
-                                break
-                            header = 'HTTP/1.1 200 OK\r\n'
-                            header += 'Content-Length: '+len(str(f))+'\r\n\r\n'
-                            completeFile.update(len(bytes_read))
-                        #s.close()
+                    newfile = open(savefile,"wb")
+                    newfile.write(file.encode())
+                    newfile.close()
+                    
+                    header = 'HTTP/1.1 200 OK\r\n\r\n'
                 except Exception as e:
                     header = 'HTTP/1.1 404 Not Found\r\n\r\n'
                     response= '<html><body>Error 404: File not Found</body></html>'.encode()
-                final_response = header.encode()    
-                client_connection.sendall(final_response)
+                print(header)
+                client_connection.sendall(header.encode())
                 
             elif (command == constants.HEAD):
                 if(myfile == '' or myfile=='/'):
