@@ -89,7 +89,7 @@ def main():
                 request += 'Content-Type: ' + content_type + '\r\n'
                 request += 'Content-Length: ' + str(file_len) + '\r\n'
                 request += 'Connection: keep-alive\r\n\r\n'
-                request += file_data.decode()
+                request += file_data.decode(constants.ENCONDING_FORMAT)
                 request += '\r\n'
                 printRequest(request)
                 #Send request
@@ -98,7 +98,6 @@ def main():
                 response = receiveResponse(client_socket)
                 printResponse(response)
                 status_code = getStatusCode(response)
-                #print("Response: ", response)
             else:
                 "File not found."
             print('***********************************')
