@@ -14,7 +14,7 @@ def main():
     host_to_connect = input()
 
     #Connect to host
-    client_socket.connect((host_to_connect, constants.PORT))
+    client_socket.connect((host_to_connect, constants.PORT_HTTP))
     local_tuple = client_socket.getsockname()
     print('Connected to the server from:', local_tuple)
     print('Enter \"quit\" to exit')
@@ -24,6 +24,7 @@ def main():
     print('3. POST')
     print('4. PUT')
     print('5. DELETE')
+    print('Enter a command:')
     command_to_send = input()
 
 
@@ -35,10 +36,12 @@ def main():
             request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
+            printRequest(request)
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
+            printResponse(response)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
             if (status_code == '200'):
@@ -61,7 +64,7 @@ def main():
                 file_data = file.read()
                 print('Read! Data: ', file_data)
                 file_len = len(file_data)
-                print('Length: ', file_len)
+                #print('Length: ', file_len)
                 file.close()
                 success = True
             except Exception:
@@ -82,13 +85,14 @@ def main():
             request += 'Content-Type: ' + content_type + '\r\n'
             request += 'Content-Length: ' + str(file_len) + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
-            request += str(file_data) + '\r\n'
-            print('***********************************')
-            print('REQUEST: \n', request)
+            request += str(file_data)
+            request += '\r\n'
+            printRequest(request)
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
+            printResponse(response)
             status_code = getStatusCode(response)
             #print("Response: ", response)
         elif (command_to_send == constants.DELETE):
@@ -98,26 +102,26 @@ def main():
             request = command_to_send + ' ' + file_path + ' HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
-            print('REQUEST:', request.decode())
-            print('***********************************')
+            printRequest(request)
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = receiveResponse(client_socket)
             status_code = getStatusCode(response)
-            print("Response: ", response)
+            printResponse(response)
         elif (command_to_send == constants.HEAD):
             print('Input data to get')
             data_to_get = input()
             request = command_to_send + ' ' + data_to_get + ' ' + 'HTTP/1.1\r\n'
             request += 'Host: ' + host_to_connect + '\r\n\r\n'
+            printRequest(request)
             #Send request
             client_socket.sendall(request.encode())
             #Receive response
             response = b''
             response = client_socket.recv(8000)
-            response = response.split(b"\r\n\r\n")
-            print('Response: ', response)
+            response = response.split(b'\r\n\r\n')
+            printResponse(response)
             status_code = getStatusCode(response)
             headers = getHeaders(response[0])
         else:
@@ -128,9 +132,11 @@ def main():
         command_to_send = input()
 
     #Quit program - Close connection
-    client_socket.sendall(b'QUIT')
+    request = 'QUIT'
+    printRequest(request)
+    client_socket.sendall(request.encode())
     response = receiveResponse(client_socket)
-    print(response)
+    printResponse(response)
     print('Closing connection...')
     client_socket.close()  
 
@@ -138,7 +144,6 @@ def main():
 def receiveResponse(client_socket):
     response = b""
     response = client_socket.recv(1000000000)
-    print(response)
     response = response.split(b"\r\n\r\n")
     return response
 
@@ -190,6 +195,17 @@ def getHeaders(response):
 #Function to get response's status code
 def getStatusCode(response):
     return response[0].decode().split(' ')[1]
+
+def printRequest(request):
+    print('***********************************')
+    print('REQUEST:')
+    print(request)
+
+def printResponse(response):
+    print('***********************************')
+    print('RESPONSE:')
+    for res in response:
+        print(response.decode())
 
 if __name__ == '__main__':
     main()
