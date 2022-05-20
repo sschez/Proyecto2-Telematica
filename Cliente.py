@@ -85,7 +85,7 @@ def main():
             request += 'Content-Type: ' + content_type + '\r\n'
             request += 'Content-Length: ' + str(file_len) + '\r\n'
             request += 'Connection: keep-alive\r\n\r\n'
-            request += str(file_data)
+            request += file_data.decode()
             request += '\r\n'
             printRequest(request)
             #Send request
