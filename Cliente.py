@@ -15,7 +15,7 @@ def main():
     host_to_connect = input()
 
     #Connect to host
-    client_socket.connect((host_to_connect, constants.PORT))
+    client_socket.connect((host_to_connect, constants.PORT_HTTP))
     local_tuple = client_socket.getsockname()
     print('Connected to the server from:', local_tuple)
     print('Enter \"quit\" to exit')
@@ -47,8 +47,8 @@ def main():
             headers = getHeaders(response[0])
             if (status_code == '200'):
                 received_file = response[1]
+                saveIndex(received_file,data_to_get)
                 if (headers[b'Content-Type'].split(b';')[0] == b'text/html'):
-                    saveIndex(received_file)
                     resources = findResources(received_file.decode())
                     getResources(resources, host_to_connect)
                     print("Resources saved locally!")     
@@ -242,8 +242,10 @@ def findResources(response):
         resources.append(img.get('src'))
     return resources
 
-def saveIndex(data):
-    newfile = open('downloads/index.html',"wb")
+def saveIndex(data,name):
+    name = name.split("/")
+    name = name[len(name)-1]
+    newfile = open('downloads/' + name,"wb")
     newfile.write(data)
     newfile.close()
 
