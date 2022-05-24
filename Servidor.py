@@ -21,7 +21,7 @@ def main():
     print("***********************************")
     print("Server is running...")
     print("Dir IP:",server_address )
-    print("Port:", constants.PORT)
+    print("Port:", constants.PORT_HTTP)
     server_execution()
     
 # Handler for manage incomming clients conections...
@@ -87,6 +87,8 @@ def handler_client_connection(client_connection,client_address):
                             mimetype = 'text/csv'
                     elif(requesting_source.endswith('.mpeg')):
                             mimetype = 'video/mpeg'
+                    elif(requesting_source.endswith('.exe')):
+                            mimetype = 'application/exe'
                     else:
                             mimetype = 'text/html'
                     header += 'Content-Type: '+str(mimetype)+'\r\n\r\n'
@@ -188,7 +190,7 @@ def handler_client_connection(client_connection,client_address):
 
                 except Exception as e:
                     header = 'HTTP/1.1 404 Not Found\r\n\r\n'
-                    response= '<html><body>Error 404: File not Found</body></html>'.encode()
+                    #response= '<html><body>Error 404: File not Found</body></html>'.encode()
                 final_response = header.encode()                          
                 client_connection.sendall(final_response)
             
@@ -200,7 +202,7 @@ def handler_client_connection(client_connection,client_address):
 
 #Function to start server process...
 def server_execution():
-    tuple_connection = (server_address,constants.PORT)
+    tuple_connection = (server_address,constants.PORT_HTTP)
     server_socket.bind(tuple_connection)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print ('Socket is bind to address and port...')
