@@ -232,8 +232,8 @@ def printResponse(response):
     print('***********************************')
     print('RESPONSE:')
     print(response[0].decode())
-    for res in response[1:len(response)]:
-        print(res)
+    #for res in response[1:len(response)]:
+    #   print(res)
 
 def findResources(response):
     resources = []
