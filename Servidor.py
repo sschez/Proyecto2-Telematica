@@ -202,7 +202,7 @@ def handler_client_connection(client_connection,client_address):
 
 #Function to start server process...
 def server_execution():
-    tuple_connection = (server_address,constants.PORT)
+    tuple_connection = (server_address,constants.PORT_HTTP)
     server_socket.bind(tuple_connection)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print ('Socket is bind to address and port...')
