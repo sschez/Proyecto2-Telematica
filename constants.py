@@ -1,6 +1,6 @@
 # Constants....
 
-IP_SERVER = '172.31.21.47'
+IP_SERVER = '127.0.0.1'
 PORT = 9091
 PORT_HTTP = 80
 ENCONDING_FORMAT = 'utf-8'

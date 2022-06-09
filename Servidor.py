@@ -21,7 +21,7 @@ def main():
     print("***********************************")
     print("Server is running...")
     print("Dir IP:",server_address )
-    print("Port:", constants.PORT_HTTP)
+    print("Port:", constants.PORT)
     server_execution()
     
 # Handler for manage incomming clients conections...
@@ -202,7 +202,7 @@ def handler_client_connection(client_connection,client_address):
 
 #Function to start server process...
 def server_execution():
-    tuple_connection = (server_address,constants.PORT_HTTP)
+    tuple_connection = (server_address,constants.PORT)
     server_socket.bind(tuple_connection)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print ('Socket is bind to address and port...')
