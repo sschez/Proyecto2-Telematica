@@ -21,7 +21,7 @@ def main():
     print("***********************************")
     print("Server is running...")
     print("Dir IP:",server_address )
-    print("Port:", constants.PORT)
+    print("Port:", constants.PORT_HTTP)
     server_execution()
     
 # Handler for manage incomming clients conections...
